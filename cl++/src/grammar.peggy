@@ -5,7 +5,7 @@ Program
 
 
 FunctionDeclaration
-    = "fn " name:Identifier "() {" _ body:[^}]+ "}" {
+    = "fn " name:Identifier "()" _ "{" _ body:[^}]+ _ "}" {
         return {
             type: "FunctionDeclaration",
             name: name,
