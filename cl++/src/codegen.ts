@@ -1,12 +1,13 @@
 import stdlib from "./stdlib.js";
 import { type ASTNode } from "./types/index.js";
 
-const capitalize = (str: string): string => str.charAt(0).toUpperCase() + str.slice(1);
+const capitalize = (str: string): string =>
+  str.charAt(0).toUpperCase() + str.slice(1);
 
 const generate = (node: ASTNode): string => {
   switch (node.type) {
     case "Program":
-      const moduleHeader = `-module(main).\n-export([main/0]).\n\n`;
+      const moduleHeader = `-module(main).\n-export([start/0]).\n\n`;
       const body = node.body.map(generate).join("\n\n");
       return moduleHeader + body;
 
@@ -28,7 +29,10 @@ const generate = (node: ASTNode): string => {
       return `${callee}(${args})`;
 
     case "MemberExpression":
-      const objName = node.object.type === "Identifier" ? node.object.name : generate(node.object);
+      const objName =
+        node.object.type === "Identifier"
+          ? node.object.name
+          : generate(node.object);
       return `${objName}:${node.property.name}`;
 
     case "StringLiteral":
