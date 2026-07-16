@@ -1,12 +1,12 @@
 Program
-    = _ decls:FunctionDeclaration* _ {
+    = _ decls:(func:FunctionDeclaration _ { return func })* {
         return {
             type: "Program", body: decls
         }
     }
 
 FunctionDeclaration
-    = "fn" _ name:Identifier _ "(" _ params:ParameterList _ ")" _ "{" _ body:Statement* _ "}" {
+    = "fn" _ name:Identifier _ "(" _ params:ParameterList _ ")" _ "{" _ body:(stmt:Statement _ { return stmt })* "}" {
         return {
             type: "FunctionDeclaration",
             name: name,
@@ -47,7 +47,7 @@ NumberLiteral
     }
 
 Statement
-    = IfStatement / WhileStatement / VariableDeclaration / ExpressionStatement
+    = ReturnStatement / IfStatement / WhileStatement / VariableDeclaration / ExpressionStatement
 
 IfStatement
     = "if" _ "(" _ cond:Expression _ ")" _ "{" _ cons:Statement* _ "}"
@@ -122,6 +122,14 @@ CompareExpression
         }
     }
     / AdditiveExpression
+
+ReturnStatement
+    = "return" _ arg:Expression _ {
+        return {
+            type: "ReturnStatement",
+            argument: arg
+        }
+    }
 
 AdditiveExpression
     = head:BaseExpression tail:(

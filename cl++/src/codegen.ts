@@ -1,7 +1,8 @@
 import stdlib from "./stdlib.js";
 import { type ASTNode } from "./types/index.js";
 
-const capitalize = (str: string): string => str.charAt(0).toUpperCase() + str.slice(1);
+const capitalize = (str: string): string =>
+  str.charAt(0).toUpperCase() + str.slice(1);
 
 const generate = (node: ASTNode): string => {
   switch (node.type) {
@@ -13,7 +14,15 @@ const generate = (node: ASTNode): string => {
     case "FunctionDeclaration":
       const funcName = node.name.name;
       const stmts = node.body.map(generate).join(",\n    ");
-      return `${funcName}() ->\n    ${stmts}.`;
+      const params = node.params.map(generate).join(",");
+
+      const funcBody = stmts.length > 0 ? stmts : "ok";
+
+      return `${funcName}(${params}) ->\n    try\n        ${funcBody}\n    catch\n        throw:{'__clx_return', ReturnValue} -> \n        ReturnValue\n    end.`;
+
+    case "ReturnStatement":
+      const arg = generate(node.argument);
+      return `throw({'__clx_return', ${arg}})`;
 
     case "BinaryExpression":
       const left = generate(node.left);

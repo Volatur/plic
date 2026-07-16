@@ -15,7 +15,8 @@ class Scope {
   }
 
   public define(name: string, kind: SymbokKind): void {
-    if (this.symbols.has(name)) exitWithError(`Identifier ${name} is already defined`);
+    if (this.symbols.has(name))
+      exitWithError(`Identifier ${name} is already defined`);
     this.symbols.set(name, { name, kind });
   }
 
@@ -60,6 +61,10 @@ class SemanticAnalyzer {
         this.analyze(node.value);
         this.currentScope.define(node.name.name, "variable");
         node.name.symbolKind = "variable";
+        break;
+
+      case "ReturnStatement":
+        this.analyze(node.argument);
         break;
 
       case "WhileStatement":

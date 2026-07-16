@@ -1,7 +1,11 @@
 export type ASTNode = Program | FunctionDeclaration | Statement | Expression;
 
 export type Statement =
-  ExpressionStatement | VariableDeclaration | IfStatement | WhileStatement;
+  | ExpressionStatement
+  | VariableDeclaration
+  | IfStatement
+  | WhileStatement
+  | ReturnStatement;
 
 export type PrimaryExpression =
   StringLiteral | Identifier | BooleanLiteral | NumberLiteral | ArrayExpression;
@@ -31,6 +35,11 @@ export interface WhileStatement {
   type: "WhileStatement";
   condition: Expression;
   body: Statement[];
+}
+
+export interface ReturnStatement {
+  type: "ReturnStatement";
+  argument: Expression;
 }
 
 export interface ArrayExpression {
