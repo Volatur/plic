@@ -1,5 +1,5 @@
 const stdlib: Record<string, (args: string) => string> = {
-  "io:print": (args) => `io:format("~s~n", [${args}])`,
+  "io:print": (args) => `clx_std:print(${args})`,
 };
 
 export default stdlib;
