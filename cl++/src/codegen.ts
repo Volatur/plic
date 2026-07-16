@@ -1,8 +1,7 @@
 import stdlib from "./stdlib.js";
 import { type ASTNode } from "./types/index.js";
 
-const capitalize = (str: string): string =>
-  str.charAt(0).toUpperCase() + str.slice(1);
+const capitalize = (str: string): string => str.charAt(0).toUpperCase() + str.slice(1);
 
 const generate = (node: ASTNode): string => {
   switch (node.type) {

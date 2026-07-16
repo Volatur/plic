@@ -1,10 +1,13 @@
 export type ASTNode = Program | FunctionDeclaration | Statement | Expression;
 
-export type Statement =
-  ExpressionStatement | VariableDeclaration | IfStatement | WhileStatement;
+export type Statement = ExpressionStatement | VariableDeclaration | IfStatement | WhileStatement;
 
 export type PrimaryExpression =
-  StringLiteral | Identifier | BooleanLiteral | NumberLiteral | ArrayExpression;
+  | StringLiteral
+  | Identifier
+  | BooleanLiteral
+  | NumberLiteral
+  | ArrayExpression;
 
 export type Expression =
   | PrimaryExpression

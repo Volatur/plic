@@ -15,8 +15,7 @@ class Scope {
   }
 
   public define(name: string, kind: SymbokKind): void {
-    if (this.symbols.has(name))
-      exitWithError(`Identifier ${name} is already defined`);
+    if (this.symbols.has(name)) exitWithError(`Identifier ${name} is already defined`);
     this.symbols.set(name, { name, kind });
   }
 
