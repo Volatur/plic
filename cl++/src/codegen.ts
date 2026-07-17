@@ -1,20 +1,32 @@
 import stdlib from "./stdlib.js";
-import { type ASTNode } from "./types/index.js";
+import { type ASTNode, type FunctionDeclaration } from "./types/index.js";
 
 const capitalize = (str: string): string =>
   str.charAt(0).toUpperCase() + str.slice(1);
 
-const generate = (node: ASTNode): string => {
+const generate = (node: ASTNode, moduleName: string = "main"): string => {
   switch (node.type) {
     case "Program":
-      const moduleHeader = `-module(main).\n-export([start/0]).\n\n`;
-      const body = node.body.map(generate).join("\n\n");
-      return moduleHeader + body;
+      const functions = node.body.filter(
+        (n): n is FunctionDeclaration => n.type === "FunctionDeclaration"
+      )
+
+      const exportedFunctions = functions.filter(f => f.isPublic)
+
+      const exports = exportedFunctions.map(f => `${f.name.name}/${f.params.length}`).join(", ")
+
+      const exportHeader = exports.length > 0 ? `-export([${exports}]).\n\n` : "\n";
+      const moduleHeader = `-module(${moduleName}).\n${exportHeader}`
+
+      const body = node.body.map(e => generate(e, moduleName)).join("\n\n");
+
+
+      return moduleHeader + body
 
     case "FunctionDeclaration":
       const funcName = node.name.name;
-      const stmts = node.body.map(generate).join(",\n    ");
-      const params = node.params.map(generate).join(",");
+      const stmts = node.body.map((e) => generate(e, moduleName)).join(",\n    ");
+      const params = node.params.map((e) => generate(e, moduleName)).join(",");
 
       const funcBody = stmts.length > 0 ? stmts : "ok";
 
@@ -24,6 +36,9 @@ const generate = (node: ASTNode): string => {
       const arg = generate(node.argument);
       return `throw({'__clx_return', ${arg}})`;
 
+    case "ImportDeclaration":
+      return "";
+
     case "BinaryExpression":
       const left = generate(node.left);
       const right = generate(node.right);
@@ -32,12 +47,12 @@ const generate = (node: ASTNode): string => {
       return `${left} ${operator} ${right}`;
 
     case "ArrayExpression":
-      const elements = node.elements.map(generate).join(", ");
+      const elements = node.elements.map((e) => generate(e, moduleName)).join(", ");
       return `[${elements}]`;
 
     case "WhileStatement":
       const cond = generate(node.condition);
-      const loopBody = node.body.map(generate).join(",\n    ");
+      const loopBody = node.body.map((e) => generate(e, moduleName)).join(",\n    ");
       const loopBodyCode = loopBody.length > 0 ? loopBody : "ok";
       return `(fun Loop() ->
         case clx_std:to_boolean(${cond}) of
@@ -57,16 +72,16 @@ const generate = (node: ASTNode): string => {
 
     case "IfStatement":
       const condition = generate(node.condition);
-      const consStr = node.consequent.map(generate).join(",\n    ");
+      const consStr = node.consequent.map((e) => generate(e, moduleName)).join(",\n    ");
       const consequent = consStr.length > 0 ? consStr : "ok";
 
       let alternate = "";
       if (node.alternate) {
         if (Array.isArray(node.alternate)) {
-          const altStr = node.alternate.map(generate).join(",\n    ");
+          const altStr = node.alternate.map((e) => generate(e, moduleName)).join(",\n    ");
           alternate = altStr.length > 0 ? altStr : "ok";
         } else {
-          alternate = generate(node.alternate);
+          alternate = generate(node.alternate, moduleName);
         }
       }
 
@@ -74,11 +89,11 @@ const generate = (node: ASTNode): string => {
 
     case "VariableDeclaration":
       const varName = capitalize(node.name.name);
-      return `${varName} = ${generate(node.value)}`;
+      return `${varName} = ${generate(node.value, moduleName)}`;
 
     case "CallExpression":
-      const callee = generate(node.callee);
-      const args = node.arguments.map(generate).join(", ");
+      const callee = generate(node.callee, moduleName);
+      const args = node.arguments.map((e) => generate(e, moduleName)).join(", ");
 
       if (stdlib[callee]) return stdlib[callee](args);
 
@@ -86,12 +101,12 @@ const generate = (node: ASTNode): string => {
 
     case "MemberExpression":
       if (node.computed) {
-        const object = generate(node.object);
-        const index = generate(node.property);
+        const object = generate(node.object, moduleName);
+        const index = generate(node.property, moduleName);
         return `lists:nth(${index}, ${object})`;
       } else {
-        const object = generate(node.object);
-        const prop = generate(node.property);
+        const object = generate(node.object, moduleName);
+        const prop = generate(node.property, moduleName);
         return `${object}:${prop}`;
       }
 
@@ -105,7 +120,7 @@ const generate = (node: ASTNode): string => {
       return `${node.name}`;
 
     case "ExpressionStatement":
-      return generate(node.expression);
+      return generate(node.expression, moduleName);
   }
 };
 

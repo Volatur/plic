@@ -1,17 +1,18 @@
 Program
-    = _ decls:(func:FunctionDeclaration _ { return func })* {
+    = _ decls:(decl:(ImportDeclaration / FunctionDeclaration) _ { return decl })* {
         return {
             type: "Program", body: decls
         }
     }
 
 FunctionDeclaration
-    = "fn" _ name:Identifier _ "(" _ params:ParameterList _ ")" _ "{" _ body:(stmt:Statement _ { return stmt })* "}" {
+    = pub:("pub" _)? "fn" _ name:Identifier _ "(" _ params:ParameterList _ ")" _ "{" _ body:(stmt:Statement _ { return stmt })* "}" {
         return {
             type: "FunctionDeclaration",
             name: name,
             params: params,
-            body: body
+            body: body,
+            isPublic: pub !== null
         }
     }
 
@@ -28,6 +29,15 @@ BooleanLiteral
             value: false
         }
     }
+
+ImportDeclaration
+    = "import" _ source:StringLiteral _ {
+        return {
+            type: "ImportDeclaration",
+            source: source
+        }
+    }
+
 
 ArrayExpression
     = "[" _ elements:(Expression|.., _ "," _|)? _ "]" {
@@ -47,7 +57,7 @@ NumberLiteral
     }
 
 Statement
-    = ReturnStatement / IfStatement / WhileStatement / VariableDeclaration / ExpressionStatement
+    = ImportDeclaration / ReturnStatement / IfStatement / WhileStatement / VariableDeclaration / ExpressionStatement
 
 IfStatement
     = "if" _ "(" _ cond:Expression _ ")" _ "{" _ cons:Statement* _ "}"

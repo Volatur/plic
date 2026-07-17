@@ -5,7 +5,8 @@ export type Statement =
   | VariableDeclaration
   | IfStatement
   | WhileStatement
-  | ReturnStatement;
+  | ReturnStatement
+  | ImportDeclaration;
 
 export type PrimaryExpression =
   StringLiteral | Identifier | BooleanLiteral | NumberLiteral | ArrayExpression;
@@ -17,11 +18,16 @@ export type Expression =
   | BinaryExpression
   | ArrayExpression;
 
-export type SymbokKind = "variable" | "parameter" | "function" | "builtin";
+export type SymbokKind = "variable" | "parameter" | "function" | "builtin" | "module";
+
+export type ImportDeclaration = {
+  type: "ImportDeclaration";
+  source: StringLiteral;
+};
 
 export interface Program {
   type: "Program";
-  body: FunctionDeclaration[];
+  body: (FunctionDeclaration | ImportDeclaration)[];
 }
 
 export interface IfStatement {
@@ -59,6 +65,7 @@ export interface FunctionDeclaration {
   name: Identifier;
   params: Identifier[];
   body: Statement[];
+  isPublic: boolean;
 }
 
 export interface VariableDeclaration {

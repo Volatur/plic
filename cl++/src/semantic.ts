@@ -36,12 +36,17 @@ class SemanticAnalyzer {
   public analyze(node: ASTNode): void {
     switch (node.type) {
       case "Program":
-        for (const func of node.body) {
-          this.globalScope.define(func.name.name, "function");
-          func.name.symbolKind = "function";
+        for (const decl of node.body) {
+          if (decl.type === "FunctionDeclaration") {
+            this.globalScope.define(decl.name.name, "function");
+            decl.name.symbolKind = "function";
+          } else if (decl.type === "ImportDeclaration") {
+            this.globalScope.define(decl.source.value, "module");
+          }
         }
 
-        for (const func of node.body) this.analyze(func);
+        for (const decl of node.body) if (decl.type === "FunctionDeclaration") this.analyze(decl);
+
         break;
 
       case "FunctionDeclaration":
