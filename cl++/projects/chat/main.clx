@@ -1,0 +1,23 @@
+import "server"
+import "clear_screen"
+import "db"
+import "auth"
+
+pub fn start() {
+    var db = db.db()
+
+    var serv = server.server()
+
+    var accept_response = gen_tcp.accept(serv)
+    var client = accept_response[2]
+
+    clear_screen.clear_screen(client)
+
+    while (true) {
+        auth.auth(client, db)
+    }
+
+#   gen_tcp.close(client)
+#   gen_tcp.close(serv)
+#   gen_tcp.close(db)
+}
