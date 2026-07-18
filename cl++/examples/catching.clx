@@ -1,0 +1,19 @@
+pub fn start() {
+    var str = get_bad_string()
+
+    var ex = try list_to_integer(str)
+
+    var result = element(1, ex)
+
+    if (result == :ok) {
+        var value = element(2, ex)
+        io.println(value)
+    } else {
+        io.print("Error")
+    }
+
+}
+
+fn get_bad_string() {
+    return "Хихи хаха"
+}

@@ -1,0 +1,27 @@
+pub fn start() {
+ var options = [:binary, (:packet, 0), (:active, :false), (:reuseaddr, :true)]
+ var listen_response = gen_tcp.listen(8080, options)
+ var socket = element(2, listen_response)
+
+ var accept_res = gen_tcp.accept(socket)
+ var client = element(2, accept_res)
+
+ gen_tcp.send(client, "\e[2J\e[H")
+ gen_tcp.send(client, unicode.characters_to_binary("Игра: Камень, ножницы, бумага\n"))
+ gen_tcp.send(client, unicode.characters_to_binary("Введи количество раундов: "))
+
+ var rounds_response = gen_tcp.recv(client, 0)
+ var rounds_raw_data = element(2, rounds_response)
+ var round_bytes_size = byte_size(rounds_raw_data) - 1
+ var cleaned_rounds_data = binary_part(rounds_raw_data, 0, round_bytes_size)
+ var parsed_rounds_data = binary_to_list(cleaned_rounds_data)
+ var trimmed_rounds_data = string.trim(parsed_rounds_data)
+ var rounds = list_to_integer(trimmed_rounds_data)
+
+ for (i in lists.seq(1, rounds)) {
+    io.print(i)
+ }
+
+ gen_tcp.close(client)
+ gen_tcp.close(socket)
+}
