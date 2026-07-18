@@ -1,5 +1,6 @@
 const stdlib: Record<string, (args: string) => string> = {
-  "io:print": (args) => `clx_std:print(${args})`,
+  "print": (args) => `clx_std:print(${args})`,
+  "random": (args) => `clx_std:random(${args})`
 };
 
 export default stdlib;

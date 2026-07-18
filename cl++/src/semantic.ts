@@ -34,6 +34,7 @@ class SemanticAnalyzer {
     this.globalScope.define("gen_tcp", "builtin")
     this.globalScope.define("list_to_binary", "builtin")
     this.globalScope.define("list_to_integer", "builtin")
+    this.globalScope.define("integer_to_list", "builtin")
     this.globalScope.define("element", "builtin")
     this.globalScope.define("lists", "builtin")
     this.globalScope.define("binary_to_list", "builtin")
@@ -42,6 +43,9 @@ class SemanticAnalyzer {
     this.globalScope.define("byte_size", "builtin")
     this.globalScope.define("binary_part", "builtin")
     this.globalScope.define("unicode", "builtin")
+    this.globalScope.define("timer", "builtin")
+    this.globalScope.define("random", "builtin")
+    this.globalScope.define("print", "builtin")
   }
 
   public analyze(node: ASTNode): void {
