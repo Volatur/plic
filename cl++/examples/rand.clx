@@ -1,0 +1,5 @@
+pub fn start() {
+    var rand_value = random(1, 10)
+
+    print(rand_value)
+}
