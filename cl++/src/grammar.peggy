@@ -89,7 +89,7 @@ WhileStatement
     }
 
 TryExpression
-    = "try" _ arg:(CallExpression / MemberExpression / PrimaryExpression) {
+    = "try" _ arg:(PostfixExpression) {
         return {
             type: "TryExpression",
             argument: arg
@@ -97,7 +97,7 @@ TryExpression
     }
 
 BinaryExpression
-    = left:(CallExpression / MemberExpression / PrimaryExpression) _ op:CompareOperator _ right:Expression {
+    = left:(PostfixExpression) _ op:CompareOperator _ right:Expression {
         return {
             type: "BinaryExpression",
             left: left,
@@ -177,15 +177,51 @@ AdditiveExpression
         }), head)
     }
 
-BaseExpression = TryExpression / CallExpression / MemberExpression / PrimaryExpression
+BaseExpression = TryExpression / PostfixExpression
 
-CallExpression
-    = callee:(MemberExpression / PrimaryExpression) _ "(" _ args:ArgumentList _ ")" {
-        return {
-            type: "CallExpression",
-            callee: callee,
-            arguments: args
+PostfixExpression
+    = head:PrimaryExpression tail:(
+        _ "(" _ args:ArgumentList _ ")" {
+            return {
+                type: "Call",
+                args: args
+            }
         }
+        /
+        _ "." _ prop:Identifier {
+            return {
+                type: "Member",
+                property: prop,
+                computed: false
+            }
+        }
+        /
+        _ "[" _ prop:Expression _ "]" {
+            return {
+                type: "Member",
+                property: prop,
+                computed: true
+            }
+        }
+    )* {
+        if (tail.length === 0) return head
+
+        return tail.reduce((result, element) => {
+            if (element.type === "Call") {
+                return {
+                    type: "CallExpression",
+                    callee: result,
+                    arguments: element.args
+                }
+            } else {
+                return {
+                    type: "MemberExpression",
+                    object: result,
+                    property: element.property,
+                    computed: element.computed
+                }
+            }
+        }, head)
     }
 
 ArgumentList
@@ -206,32 +242,6 @@ ParameterList
     = first:Identifier rest:(_ "," _ Identifier)* {
         return [first, ...rest.map(r => r[3])]
     } / _ {return []}
-
-MemberExpression
-    = head:PrimaryExpression tail:(
-        _ "." _ prop:Identifier {
-            return {
-                computed: false,
-                property: prop
-            }
-        }
-        /
-        _ "[" _ prop:Expression _ "]" {
-            return {
-                computed: true,
-                property: prop
-            }
-        }
-        )* {
-        if (tail.length === 0) return head
-
-        return tail.reduce((result, element) => ({
-            type: "MemberExpression",
-            object: result,
-            property: element.property,
-            computed: element.computed
-        }), head)
-    }
 
 PrimaryExpression
     = AnonymousFunctionExpression / BooleanLiteral / NumberLiteral / StringLiteral / AtomLiteral / Identifier / ArrayExpression / TupleExpression / Grouping
