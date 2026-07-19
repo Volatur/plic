@@ -46,6 +46,12 @@ class SemanticAnalyzer {
     this.globalScope.define("timer", "builtin")
     this.globalScope.define("random", "builtin")
     this.globalScope.define("print", "builtin")
+    this.globalScope.define("spawn", "builtin")
+    this.globalScope.define("calendar", "builtin")
+    this.globalScope.define("register", "builtin")
+    this.globalScope.define("list_to_atom", "builtin")
+    this.globalScope.define("self", "builtin")
+    this.globalScope.define("whereis", "builtin")
   }
 
 
