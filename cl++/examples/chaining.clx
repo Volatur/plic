@@ -1,0 +1,5 @@
+pub fn start() {
+    var arr = [1, [2, 3]]
+
+    print(arr[2][1])
+}
