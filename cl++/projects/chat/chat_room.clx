@@ -2,17 +2,21 @@ import "clear_screen"
 import "clean_input"
 import "menu"
 
-pub fn chat_room(client, db, my_nick, target_nick) {
+pub fn chat_room(client, db, my_nick, target_nick, chat_type) {
     clear_screen.clear_screen(client)
 
-    load_chat_history(client, db, my_nick, target_nick)
+    if (chat_type == :group) {
+        load_group_history(client, db, target_nick)
+    } else {
+        load_chat_history(client, db, my_nick, target_nick)
+    }
 
     gen_tcp.send(client, unicode.characters_to_binary("[ " ++ "Вы вошли в чат с " ++ target_nick ++ " | " ++ "/exit - чтоб выйти с чата, /help - напомнить команды" ++ "| " ++ "Приятного общения!:)" ++ " ]\n"))
 
-    return chat_receive_loop(client, db, my_nick, target_nick)
+    return chat_receive_loop(client, db, my_nick, target_nick, chat_type)
 }
 
-fn chat_receive_loop(client, db, my_nick, target_nick) {
+fn chat_receive_loop(client, db, my_nick, target_nick, chat_type) {
     receive {
         (:tcp, client, data) -> {
             var text = clean_input.clean_input(data)
@@ -21,39 +25,146 @@ fn chat_receive_loop(client, db, my_nick, target_nick) {
                 return menu.menu(client, db, my_nick)
             }
 
+            var parts = string.split(text, " ", :all)
+
+            if (parts[1] == "/add" and chat_type == :group) {
+                var user_to_add = parts[2]
+
+                gen_tcp.send(db, unicode.characters_to_binary("SADD group_members:" ++ target_nick ++ " " ++ user_to_add ++ "\r\n"))
+                gen_tcp.recv(db, 0)
+
+                gen_tcp.send(db, unicode.characters_to_binary("SADD user_chats:" ++ user_to_add ++ " " ++ target_nick ++ "\r\n"))
+                gen_tcp.recv(db, 0)
+
+                gen_tcp.send(client, "\e[1A\e[2K\r")
+                gen_tcp.send(client, unicode.characters_to_binary("Вы добавили " ++ user_to_add ++ " в группу.\n"))
+
+                return chat_receive_loop(client, db, my_nick, target_nick, chat_type)
+            }
+
+            if (parts[1] == "/kick" and chat_type == :group) {
+                var user_to_kick = parts[2]
+
+                gen_tcp.send(db, unicode.characters_to_binary("SREM group_members:" ++ target_nick ++ " " ++ user_to_kick ++ "\r\n"))
+                gen_tcp.recv(db, 0)
+
+                gen_tcp.send(db, unicode.characters_to_binary("SREM user_chats:" ++ user_to_kick ++ " " ++ target_nick ++ "\r\n"))
+                gen_tcp.recv(db, 0)
+
+                gen_tcp.send(client, "\e[1A\e[2K\r")
+                gen_tcp.send(client, unicode.characters_to_binary("Вы кикнули " ++ user_to_kick ++ " из группы.\n"))
+
+                return chat_receive_loop(client, db, my_nick, target_nick, chat_type)
+            }
+
             if (text == "/help") {
                 gen_tcp.send(client, unicode.characters_to_binary("Доступные команды: /exit - выйти, /help - помощь\n"))
-                return chat_receive_loop(client, db, my_nick, target_nick)
+                return chat_receive_loop(client, db, my_nick, target_nick, chat_type)
             }
 
             if (text == "") {
-                return chat_receive_loop(client, db, my_nick, target_nick)
+                return chat_receive_loop(client, db, my_nick, target_nick, chat_type)
             }
 
             var time_str = get_formatted_time()
             var formatted_msg = "[" ++ time_str ++ "] " ++ my_nick ++ ": " ++ text
 
-            save_messages_to_db(db, my_nick, target_nick, formatted_msg)
+            if (chat_type == :group) {
+                broadcast_group_message(db, target_nick, my_nick, formatted_msg)
+            } else {
+                save_messages_to_db(db, my_nick, target_nick, formatted_msg)
 
-            var target_atom = list_to_atom(target_nick)
-            var target_pid = whereis(target_atom)
+                var target_atom = list_to_atom(target_nick)
+                var target_pid = whereis(target_atom)
 
-            if (target_pid ~= :undefined) {
-                erlang.send(target_pid, (:chat_msg, formatted_msg))
+                if (target_pid ~= :undefined) {
+                    erlang.send(target_pid, (:chat_msg, formatted_msg))
+                }
             }
 
             gen_tcp.send(client, unicode.characters_to_binary("\e[1A\e[2K\r" ++ formatted_msg ++ "\n"))
 
-            return chat_receive_loop(client, db, my_nick, target_nick)
+            return chat_receive_loop(client, db, my_nick, target_nick, chat_type)
         }
 
         (:chat_msg, incoming_text) -> {
             gen_tcp.send(client, unicode.characters_to_binary(incoming_text ++ "\n"))
-            return chat_receive_loop(client, db, my_nick, target_nick)
+            return chat_receive_loop(client, db, my_nick, target_nick, chat_type)
         }
 
         (:tcp_closed, _client) -> {
             return exit(:normal)
+        }
+    }
+}
+
+fn broadcast_group_message(db, group_name, my_nick, message) {
+    var chat_key = "chat:group:" ++ group_name
+    gen_tcp.send(db, unicode.characters_to_binary("RPUSH " ++ chat_key ++ " " ++ [34] ++ message ++ [34] ++ "\r\n"))
+    gen_tcp.recv(db, 0)
+
+    gen_tcp.send(db, unicode.characters_to_binary("SMEMBERS group_members:" ++ group_name ++ "\r\n"))
+    var response = gen_tcp.recv(db, 0)
+
+    var lines = string.split(binary_to_list(response[2]), "\r\n", :all)
+
+    for (line in lines) {
+        if (line ~= "") {
+            var tr_char = try line[1]
+            if (tr_char[1] == :ok) {
+                var first_char = tr_char[2]
+                if (first_char ~= 34 and first_char ~= 42) {
+                    var member_nick = line
+
+                    if (member_nick ~= my_nick) {
+                        var member_atom = list_to_atom(member_nick)
+                        var member_pid = whereis(member_atom)
+
+                        if (member_pid ~= :undefined) {
+                            erlang.send(member_pid, (:chat_msg, message))
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return :ok
+}
+
+fn load_group_history(client, db, group_name) {
+    gen_tcp.send(db, unicode.characters_to_binary("LRANGE " ++ "chat:group:" ++ group_name ++ " 0 -1\r\n"))
+
+    var response = recv_all_redis(db, "")
+
+    var lines = string.split(response, "\r\n", :all)
+
+    for (line in lines) {
+        if (line ~= "") {
+            var decoded = unicode.characters_to_list(list_to_binary(line))
+
+            var clean_line = fn() {
+                var tr_tag = try decoded[1]
+                if (tr_tag[1] == :ok) {
+                    var tag = tr_tag[2]
+
+                    if (tag == :incomplete) {
+                        return decoded[2]
+                    } else if (tag == :error) {
+                        return line
+                    }
+                }
+                return decoded
+            }()
+
+            var tr_char = try clean_line[1]
+
+            if (tr_char[1] == :ok) {
+                var first_char = tr_char[2]
+
+                if (first_char ~= 36 and first_char ~= 42) {
+                    gen_tcp.send(client, unicode.characters_to_binary(clean_line ++ "\n"))
+                }
+            }
         }
     }
 }
