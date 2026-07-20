@@ -1,3 +1,4 @@
-fn start() {
-    var role = "Hello, World!"
+pub fn start() {
+    var hello = "Hello, World!"
+    println(hello)
 }
