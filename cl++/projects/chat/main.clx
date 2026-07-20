@@ -1,0 +1,29 @@
+import "server"
+import "clear_screen"
+import "db"
+import "auth"
+import "menu"
+
+pub fn start() {
+
+    var server = server.server()
+
+    return accpet_loop(server)
+}
+
+fn accpet_loop(server) {
+
+    var response = gen_tcp.accept(server)
+    var client = response[2]
+
+    if (response[1] == :ok) {
+        var worker = spawn(fn() {
+            var db = db.db()
+            return auth.auth(client, db)
+        })
+
+        gen_tcp.controlling_process(client, worker)
+    }
+
+    return accpet_loop(server)
+}

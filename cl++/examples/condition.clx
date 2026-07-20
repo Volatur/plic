@@ -1,0 +1,11 @@
+fn start() {
+    var role = "admin"
+
+    if (role == "admin") {
+        print("Hello, admin!")
+    } else if (role == "user") {
+        print("Hello, user!")
+    } else {
+        print("Hello, unknown!")
+    }
+}

@@ -1,0 +1,5 @@
+fn start() {
+    while (true) {
+        print("Hello, World!")
+    }
+}

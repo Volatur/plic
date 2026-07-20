@@ -1,0 +1,114 @@
+import "receive_input"
+import "clear_screen"
+import "chat_room"
+
+pub fn menu(client, db, nickname) {
+    clear_screen.clear_screen(client)
+
+    gen_tcp.send(client, unicode.characters_to_binary("\n--- Главное Меню ---\n"))
+
+    var get_chats = "SMEMBERS user_chats:" ++ nickname ++ "\r\n"
+    gen_tcp.send(db, unicode.characters_to_binary(get_chats))
+
+    var chats = gen_tcp.recv(db, 0)
+    var chat_lines = string.split(binary_to_list(chats[2]), "\r\n", :all)
+
+    gen_tcp.send(client, unicode.characters_to_binary("Ваши чаты и группы:\n"))
+
+    display_chats(client, chat_lines)
+
+    gen_tcp.send(client, unicode.characters_to_binary("Введите имя пользоватея или группы\n"))
+
+    gen_tcp.send(client, unicode.characters_to_binary(":"))
+
+    var input = receive_input.receive_input()
+
+
+    if (input == "") {
+        return menu(client, db, nickname)
+    }
+
+    var parts = string.split(input, " ", :all)
+
+    if (parts[1] == "/group") {
+        var group_name = parts[2]
+        return create_group(client, db, nickname, group_name)
+    }
+
+    return enter_chat_or_group(client, db, nickname, input)
+}
+
+fn create_group(client, db, nickname, group_name) {
+    if (group_name == "") {
+        gen_tcp.send(client, unicode.characters_to_binary("\nОшибка: Укажите имя группы.\n"))
+        timer.sleep(2000)
+        return menu(client, db, nickname)
+    }
+
+    gen_tcp.send(db, unicode.characters_to_binary("EXISTS account:" ++ group_name ++ "\r\n"))
+    var user_exists = binary_to_list(gen_tcp.recv(db, 0)[2])
+
+    gen_tcp.send(db, unicode.characters_to_binary("EXISTS group:" ++ group_name ++ "\r\n"))
+    var group_exists = binary_to_list(gen_tcp.recv(db, 0)[2])
+
+    if (user_exists == ":1\r\n" or group_exists == ":1\r\n") {
+        gen_tcp.send(client, unicode.characters_to_binary("\nОшибка: Имя уже занято.\n"))
+        timer.sleep(2000)
+        return menu(client, db, nickname)
+    }
+
+    gen_tcp.send(db, unicode.characters_to_binary("SET group:" ++ group_name ++ " 1\r\n"))
+    gen_tcp.recv(db, 0)
+
+    gen_tcp.send(db, unicode.characters_to_binary("SADD group_members:" ++ group_name ++ " " ++ nickname ++ "\r\n"))
+    gen_tcp.recv(db, 0)
+
+    gen_tcp.send(db, unicode.characters_to_binary("SADD user_chats:" ++ nickname ++ " " ++ group_name ++ "\r\n"))
+    gen_tcp.recv(db, 0)
+
+    return chat_room.chat_room(client, db, nickname, group_name, :group)
+}
+
+fn display_chats(client, chat_lines) {
+
+    for (line in chat_lines) {
+        if (line ~= "") {
+            var tr_char = try line[1]
+
+            if (tr_char[1] == :ok) {
+                var first_char = tr_char[2]
+
+                if (first_char ~= 36 and first_char ~= 42) {
+                    gen_tcp.send(client, unicode.characters_to_binary(" - " ++ line ++ "\n"))
+                }
+            }
+        }
+    }
+}
+
+fn enter_chat_or_group(client, db, nickname, target_name) {
+    gen_tcp.send(db, unicode.characters_to_binary("EXISTS account:" ++ target_name ++ "\r\n"))
+    var user = binary_to_list(gen_tcp.recv(db, 0)[2])
+
+    if (user == ":1\r\n") {
+        return chat_room.chat_room(client, db, nickname, target_name, :private)
+    }
+
+    gen_tcp.send(db, unicode.characters_to_binary("EXISTS group:" ++ target_name ++ "\r\n"))
+    var group = binary_to_list(gen_tcp.recv(db, 0)[2])
+
+    if (group == ":1\r\n") {
+        var check_member = "SISMEMBER group_members:" ++ target_name ++ " " ++ nickname ++ "\r\n"
+        gen_tcp.send(db, unicode.characters_to_binary(check_member))
+
+        var is_member = binary_to_list(gen_tcp.recv(db, 0)[2])
+
+        if (is_member == ":1\r\n") {
+            return chat_room.chat_room(client, db, nickname, target_name, :group)
+        }
+    }
+
+    gen_tcp.send(client, unicode.characters_to_binary("\nОшибка: Такого пользователя нет!"))
+    timer.sleep(2000)
+    return menu(client, db, nickname)
+}

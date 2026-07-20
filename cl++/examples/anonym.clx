@@ -1,0 +1,7 @@
+pub fn start() {
+    var add = fn(a,b) {return a + b}
+
+    var result = add(100, 100)
+
+    print(result)
+}

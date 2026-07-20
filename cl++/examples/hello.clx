@@ -1,0 +1,4 @@
+pub fn start() {
+    var hello = "Hello, World!"
+    println(hello)
+}

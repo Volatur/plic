@@ -1,0 +1,5 @@
+fn start() {
+    var one = (:hehe,)
+
+    print(one)
+}

@@ -1,0 +1,106 @@
+pub fn start() {
+ var options = [:binary, (:packet, 0), (:active, :false), (:reuseaddr, :true)]
+ var listen_response = gen_tcp.listen(8080, options)
+ var socket = element(2, listen_response)
+
+ var accept_res = gen_tcp.accept(socket)
+ var client = element(2, accept_res)
+
+ var rounds = ask_for_rounds(client)
+
+ for (i in lists.seq(1, rounds)) {
+    var result = ask_for_answer(client, i, rounds)
+    game(client, result)
+ }
+
+ gen_tcp.close(client)
+ gen_tcp.close(socket)
+}
+
+fn game(client, answer) {
+    var computer_choice = random(1, 3)
+
+    if (computer_choice == 1) {
+        if (answer == 2) {
+            gen_tcp.send(client, unicode.characters_to_binary("Вы выиграли!\n"))
+        } else {
+            gen_tcp.send(client, unicode.characters_to_binary("Вы проиграли!\n"))
+        }
+    } else if (computer_choice == 2) {
+        if (answer == 3) {
+            gen_tcp.send(client, unicode.characters_to_binary("Вы выиграли!\n"))
+        } else {
+            gen_tcp.send(client, unicode.characters_to_binary("Вы проиграли!\n"))
+        }
+    } else {
+        if (answer == 1) {
+            gen_tcp.send(client, unicode.characters_to_binary("Вы выиграли!\n"))
+        } else {
+            gen_tcp.send(client, unicode.characters_to_binary("Вы проиграли!\n"))
+        }
+    }
+
+    timer.sleep(2000)
+}
+
+fn ask_for_answer(client, i, rounds) {
+    clear_screen(client)
+    gen_tcp.send(client, unicode.characters_to_binary("1 - ножницы | 2 - камень | 3 - бумага\n"))
+    gen_tcp.send(client, unicode.characters_to_binary("Раунд " ++ integer_to_list(i) ++ "/" ++ integer_to_list(rounds) ++ "\n"))
+    var result = read_int(client)
+    var status = element(1, result)
+
+    if (status == :ok) {
+        if (element(2, result) >= 1) {
+            if (element(2, result) <= 3) {
+                return element(2, result)
+            } else {
+                gen_tcp.send(client, unicode.characters_to_binary("Ошибка ввода: Введите число от 1 до 3!\n"))
+                timer.sleep(2000)
+                return ask_for_answer(client, i, rounds)
+            }
+        } else {
+            gen_tcp.send(client, unicode.characters_to_binary("Ошибка ввода: Введите число от 1 до 3!\n"))
+            timer.sleep(2000)
+            return ask_for_answer(client, i, rounds)
+        }
+    } else {
+        gen_tcp.send(client, unicode.characters_to_binary("Ошибка ввода: Введите число!\n"))
+        timer.sleep(2000)
+        return ask_for_answer(client, i, rounds)
+    }
+}
+
+fn ask_for_rounds(client) {
+    clear_screen(client)
+    gen_tcp.send(client, unicode.characters_to_binary("Игра: Камень, ножницы, бумага\n"))
+    gen_tcp.send(client, unicode.characters_to_binary("Введи количество раундов: "))
+
+
+    var rounds = read_int(client)
+    var status = element(1, rounds)
+
+    if (status == :ok) {
+        return element(2, rounds)
+    } else {
+        gen_tcp.send(client, unicode.characters_to_binary("Ошибка ввода: Введите число!\n"))
+        timer.sleep(2000)
+        return ask_for_rounds(client)
+    }
+}
+
+fn read_int(client) {
+    var response = gen_tcp.recv(client, 0)
+    var raw_data = element(2, response)
+    var bytes_size = byte_size(raw_data) - 1
+    var cleaned_data = binary_part(raw_data, 0, bytes_size)
+    var parsed_data = binary_to_list(cleaned_data)
+    var trimmed_data = string.trim(parsed_data)
+    var rounds = try list_to_integer(trimmed_data)
+
+    return rounds
+}
+
+fn clear_screen(client) {
+    gen_tcp.send(client, "\e[2J\e[H")
+}

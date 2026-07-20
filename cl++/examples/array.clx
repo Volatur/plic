@@ -1,0 +1,6 @@
+fn start() {
+    var list = ["Hello", ",", "World", "!"]
+
+    print(list)
+    print(list[1])
+}

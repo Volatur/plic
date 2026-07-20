@@ -1,0 +1,11 @@
+pub fn start() {
+    var me = erlang.self()
+
+    erlang.send(me, (:test_message, "Hello, world!"))
+
+    receive {
+        (:test_message, data) -> {
+            print(data)
+        }
+    }
+}
