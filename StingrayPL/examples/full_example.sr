@@ -1,0 +1,89 @@
+// Stingray Language — Full Working Example
+// Демонстрация всех поддерживаемых возможностей
+
+#use Math as math
+#use SL as io
+
+// Enum
+enum gender {
+    WOMEN
+    MAN
+}
+
+// Struct
+type struct User {
+    Int32 serial,
+    String username,
+    gender userGender
+}
+
+// Function with struct param
+fun sayName(user: User) {
+    io.write(user.username)
+}
+
+// Main
+fun main() {
+    // Typed variable
+    userGender: gender = MAN
+
+    // Struct creation
+    user_test = User.new(1, "Alice", gender.MAN)
+
+    // Access struct fields
+    name = user_test.username
+    io.write(name)
+
+    // Untyped variable + arithmetic
+    x = 42
+    sum = 10 + 3
+    diff = 10 - 3
+    prod = 10 * 3
+    quot = 10 / 3
+    io.write(sum)
+    io.write(diff)
+    io.write(prod)
+    io.write(quot)
+
+    // Function call
+    sayName(user_test)
+
+    // if/else
+    if x > 40 {
+        io.write("x is big")
+    } else {
+        io.write("x is small")
+    }
+
+    // Bool ops
+    if x > 0 && x < 100 || x == 42 {
+        io.write("conditions work")
+    }
+
+    // Not
+    flag = false
+    if !flag {
+        io.write("not works")
+    }
+
+    // Enum access
+    g = gender.WOMEN
+    if g == gender.WOMEN {
+        io.write("gender is WOMEN")
+    }
+
+    // #flow# parallel
+    #flow:3# io.write("parallel hello\n")
+
+    // Nested if/else
+    val = 15
+    if val > 20 {
+        io.write("big")
+    } else {
+        if val > 10 {
+            io.write("medium")
+        } else {
+            io.write("small")
+        }
+    }
+}

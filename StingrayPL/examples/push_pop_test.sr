@@ -1,0 +1,33 @@
+// push/pop test
+#use SL as io
+
+fun main() {
+    // Push — creates new list
+    nums = [1, 2, 3]
+    nums2 = nums.push(4)
+    nums3 = nums2.push(5)
+    io.write(nums3)
+    io.write(nums3.length)
+
+    // Pop — returns last element
+    last = nums3.pop()
+    io.write(last)
+    io.write(nums3.length)
+
+    // Push string
+    words = ["hello"]
+    words2 = words.push("world")
+    io.write(words2)
+
+    // Empty list push
+    empty = []
+    empty2 = empty.push(42)
+    io.write(empty2)
+    io.write(empty2.length)
+
+    // Pop from single-element list
+    single = [99]
+    val = single.pop()
+    io.write(val)
+    io.write(single.length)
+}

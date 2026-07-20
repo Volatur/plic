@@ -1,0 +1,38 @@
+// Stingray Chat Server
+// Запуск: escript test.erl --compile examples/chat_server.sr
+
+#use SL as io
+
+fun accept_loop(listener: Int32) {
+    client = stingray_runtime.tcp_accept(listener)
+    if client != false {
+        io.write("+ Client connected\n")
+        handle_client(client)
+        stingray_runtime.tcp_close(client)
+        io.write("- Client disconnected\n")
+        accept_loop(listener)
+    }
+}
+
+fun handle_client(client: Int32) {
+    data = stingray_runtime.tcp_recv(client, 60000)
+    if data != false {
+        msg = data
+        io.write("msg: ")
+        io.write(msg)
+        stingray_runtime.tcp_send(client, "echo: " + msg + "\n")
+        handle_client(client)
+    }
+}
+
+fun main() {
+    io.write("=== Stingray Chat Server ===\n")
+    io.write("Listening on localhost:9999\n")
+    listener = stingray_runtime.tcp_listen(9999, [])
+    if listener != false {
+        io.write("Server started!\n")
+        accept_loop(listener)
+    } else {
+        io.write("Failed to start\n")
+    }
+}

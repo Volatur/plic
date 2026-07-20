@@ -1,0 +1,24 @@
+// Stingray Chat Client
+// Запуск: escript test.erl --compile examples/chat_client.sr
+
+#use SL as io
+
+fun main() {
+    io.write("=== Stingray Chat Client ===\n")
+    io.write("Connecting to localhost:9999...\n")
+    sock = stingray_runtime.tcp_connect(127, 0, 0, 1, 9999)
+    if sock != false {
+        io.write("Connected!\n")
+        stingray_runtime.tcp_send(sock, "Hello from Stingray!\n")
+        io.write("Message sent!\n")
+        resp = stingray_runtime.tcp_recv(sock, 2000)
+        if resp != false {
+            io.write("Server: ")
+            io.write(resp)
+        }
+        stingray_runtime.tcp_close(sock)
+        io.write("Disconnected.\n")
+    } else {
+        io.write("Connection failed!\n")
+    }
+}

@@ -1,0 +1,27 @@
+// Test: while loop with outer variable access
+#use SL as io
+
+fun main() {
+    // Pattern 1: var_decl + while with modified var (merged)
+    counter = 0
+    while counter < 5 {
+        counter = counter + 1
+    }
+    io.write(counter)
+
+    // Pattern 2: while reading outer var (closure capture)
+    user_test = "hello"
+    i = 0
+    while i < 3 {
+        io.write(user_test)
+        i = i + 1
+    }
+
+    // Pattern 3: while without var modification (closure only)
+    x = 42
+    flag = true
+    while flag {
+        io.write(x)
+        flag = false
+    }
+}

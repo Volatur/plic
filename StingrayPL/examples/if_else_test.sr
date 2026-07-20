@@ -1,0 +1,77 @@
+// Test: if/else, logical operations, comparisons
+#use Math as math
+
+fun is_positive(x: Int32) {
+    if x > 0 {
+        io.write("positive")
+    } else {
+        io.write("non-positive")
+    }
+}
+
+fun main() {
+    // Basic if/else
+    x = 42
+    if x > 0 {
+        io.write("x is positive")
+    } else {
+        io.write("x is not positive")
+    }
+
+    // Else-if is just nested if
+    y = 0
+    if y > 0 {
+        io.write("positive")
+    } else {
+        if y < 0 {
+            io.write("negative")
+        } else {
+            io.write("zero")
+        }
+    }
+
+    // Logical AND
+    a = 10
+    b = 20
+    if a > 5 && b > 15 {
+        io.write("both true")
+    }
+
+    // Logical OR
+    if a > 100 || b > 15 {
+        io.write("at least one true")
+    }
+
+    // Logical NOT
+    flag = false
+    if !flag {
+        io.write("not false = true")
+    }
+
+    // Equality
+    if x == 42 {
+        io.write("x equals 42")
+    }
+
+    // Not equal
+    if x != 0 {
+        io.write("x is not zero")
+    }
+
+    // Comparison operators
+    if x >= 42 {
+        io.write("x >= 42")
+    }
+    if x <= 42 {
+        io.write("x <= 42")
+    }
+
+    // Bool literals
+    if true {
+        io.write("always true")
+    }
+
+    // Function call in condition
+    result = is_positive(10)
+    is_positive(-5)
+}

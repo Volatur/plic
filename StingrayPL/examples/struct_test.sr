@@ -1,0 +1,61 @@
+// Struct test — all features
+#use SL as io
+
+enum color {
+    RED
+    GREEN
+    BLUE
+}
+
+type struct Point {
+    Int32 x,
+    Int32 y
+}
+
+type struct User {
+    Int32 id,
+    String name,
+    color favColor
+}
+
+fun distance(p: Point) {
+    p.x + p.y
+}
+
+fun main() {
+    // Создание структуры
+    p = Point.new(10, 20)
+
+    // Доступ к полям
+    px = p.x
+    py = p.y
+    io.write(px)
+    io.write(py)
+
+    // Использование в функции
+    d = distance(p)
+    io.write(d)
+
+    // Несколько структур
+    u = User.new(1, "Alice", color.RED)
+    uid = u.id
+    uname = u.name
+    ucolor = u.favColor
+    io.write(uid)
+    io.write(uname)
+
+    // Сравнение enum поля
+    if ucolor == color.RED {
+        io.write("red")
+    }
+
+    // Структура с enum полем
+    u2 = User.new(2, "Bob", color.BLUE)
+    if u2.favColor == color.BLUE {
+        io.write("blue")
+    }
+
+    // Запись в поле (member access на l-value — пока через new)
+    u3 = User.new(3, "Charlie", color.GREEN)
+    io.write(u3.name)
+}

@@ -1,0 +1,25 @@
+// String concatenation test
+#use SL as io
+
+fun main() {
+    a = "Hello"
+    b = " World"
+    c = a + b
+    io.write(c)
+
+    // Concat with number (number becomes string)
+    x = "Count: " + 42
+    io.write(x)
+
+    // Multiple concatenations
+    msg = "a" + "b" + "c" + "d"
+    io.write(msg)
+
+    // String length
+    s = "hello"
+    io.write(s.length)
+
+    // String + empty
+    full = "prefix" + ""
+    io.write(full)
+}

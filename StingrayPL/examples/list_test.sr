@@ -1,0 +1,33 @@
+// Array / List test
+#use SL as io
+
+fun main() {
+    // Создание списка
+    nums = [1, 2, 3, 4, 5]
+    empty = []
+
+    // Доступ по индексу (0-based)
+    first = nums[0]
+    third = nums[2]
+    io.write(first)
+    io.write(third)
+
+    // Пустой список
+    io.write(empty)
+
+    // Список строк
+    names = ["Alice", "Bob", "Charlie"]
+    io.write(names[0])
+    io.write(names[1])
+    io.write(names[2])
+
+    // Nested list
+    matrix = [[1, 2], [3, 4]]
+    io.write(matrix[0])
+    io.write(matrix[1])
+
+    // List in function
+    x = [10, 20, 30]
+    io.write(x[0])
+    io.write(x[2])
+}

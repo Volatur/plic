@@ -1,0 +1,28 @@
+// Test: enum, struct, new, member access, functions
+#use Math as math
+
+enum color {
+    RED
+    GREEN
+    BLUE
+}
+
+type struct Point {
+    Int32 x,
+    Int32 y
+}
+
+fun dist(x: Int32) {
+    x
+}
+
+fun main() {
+    c = color.RED
+    p = Point.new(10, 20)
+    px = p.x
+    py = p.y
+    result = dist(42)
+    io.write(result)
+    io.write(px)
+    io.write(py)
+}

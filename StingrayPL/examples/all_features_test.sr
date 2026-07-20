@@ -1,0 +1,52 @@
+// Test: all features
+#use SL as io
+
+fun fib(n: Int32) {
+    if n <= 1 {
+        n
+    } else {
+        fib(n - 1) + fib(n - 2)
+    }
+}
+
+fun main() {
+    // recursion + if/else
+    result = fib(7)
+    io.write(result)
+
+    // postfix ++ (as expression)
+    x = 5
+    y = x++
+    io.write(y)
+    io.write(x)
+
+    // while with counter
+    i = 0
+    while i < 5 {
+        i = i + 1
+    }
+    io.write(i)
+
+    // list.length
+    nums = [10, 20, 30, 40, 50]
+    io.write(nums.length)
+
+    // list indexing
+    io.write(nums[0])
+    io.write(nums[4])
+
+    // not keyword
+    flag = false
+    if not flag {
+        io.write("not works")
+    }
+
+    // empty list
+    empty = []
+    io.write(empty.length)
+
+    // nested lists
+    matrix = [[1, 2], [3, 4], [5, 6]]
+    io.write(matrix.length)
+    io.write(matrix[1])
+}

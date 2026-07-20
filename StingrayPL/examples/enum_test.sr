@@ -1,0 +1,43 @@
+// Enum test
+#use SL as io
+
+enum color {
+    RED
+    GREEN
+    BLUE
+}
+
+enum direction {
+    NORTH
+    SOUTH
+    EAST
+    WEST
+}
+
+fun main() {
+    // Создание enum
+    c = color.RED
+    d = direction.NORTH
+
+    // Сравнение
+    if c == color.RED {
+        io.write("color is RED")
+    }
+    if c == color.GREEN {
+        io.write("color is GREEN")
+    }
+    if d == direction.NORTH {
+        io.write("direction is NORTH")
+    }
+
+    // Enum в if/else
+    if c != color.BLUE {
+        io.write("not blue")
+    }
+
+    // Enum в переменной
+    favorite = color.GREEN
+    if favorite == color.GREEN {
+        io.write("favorite is GREEN")
+    }
+}
