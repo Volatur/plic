@@ -1,0 +1,87 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "scopeName": "source.clx",
+  "name": "CL++",
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#strings" },
+    { "include": "#atoms" },
+    { "include": "#booleans" },
+    { "include": "#numbers" },
+    { "include": "#function_declarations" },
+    { "include": "#keywords" },
+    { "include": "#operators" },
+    { "include": "#function_calls" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.number-sign.clx",
+          "begin": "#",
+          "end": "$"
+        }
+      ]
+    },
+    "strings": {
+      "name": "string.quoted.double.clx",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        {
+          "name": "constant.character.escape.clx",
+          "match": "\\\\."
+        }
+      ]
+    },
+    "atoms": {
+      "name": "constant.other.symbol.clx",
+      "match": ":[a-zA-Z_][a-zA-Z0-9_]*\\b"
+    },
+    "booleans": {
+      "name": "constant.language.boolean.clx",
+      "match": "\\b(true|false)\\b"
+    },
+    "numbers": {
+      "name": "constant.numeric.clx",
+      "match": "\\b\\d+(\\.\\d+)?\\b"
+    },
+    "function_declarations": {
+      "match": "\\b(fn)\\s+([a-zA-Z_][a-zA-Z0-9_]*)\\b",
+      "captures": {
+        "1": { "name": "storage.type.function.clx" },
+        "2": { "name": "entity.name.function.clx" }
+      }
+    },
+    "function_calls": {
+      "match": "\\b([a-zA-Z_][a-zA-Z0-9_]*)\\s*(?=\\()",
+      "captures": {
+        "1": { "name": "entity.name.function.call.clx" }
+      }
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.clx",
+          "match": "\\b(if|else|while|for|in|return|receive|try)\\b"
+        },
+        {
+          "name": "storage.modifier.clx",
+          "match": "\\b(pub)\\b"
+        },
+        {
+          "name": "storage.type.clx",
+          "match": "\\b(fn|var|import)\\b"
+        },
+        {
+          "name": "keyword.operator.logical.clx",
+          "match": "\\b(and|or)\\b"
+        }
+      ]
+    },
+    "operators": {
+      "name": "keyword.operator.clx",
+      "match": "(==|~=|<=|>=|<|>|\\+\\+|\\+|-|=|->)"
+    }
+  }
+}
