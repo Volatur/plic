@@ -1,0 +1,13 @@
+[package]
+name = "ygvm"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+libc = "0.2.186"
+parking_lot = "0.12.5"
+rand = "0.10.2"
+serde_json = "1.0.150"
+thiserror = "2.0.18"
+thread-id = "5.1.0"
+threadpool = "1.8.1"
