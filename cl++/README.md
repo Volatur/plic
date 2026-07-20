@@ -104,7 +104,7 @@ receive {
 
 ## Чат
 
-[chat](https://github.com/TraumDE/plic/blob/main/cl%2B%2B/media/chat_demo.gif)
+<img width="800" height="418" alt="ScreencastFrom2026-07-2007-16-03-ezgif com-video-to-gif-converter" src="https://github.com/user-attachments/assets/9a5aaa8c-ef6a-4c91-843a-b0c770f45ad0" />
 
 Для демонстрации возможностей языка был написан чат (avm файл можно сказать в релизах)
 
